@@ -11,9 +11,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appblesafhere.presentation.viewmodel.BleDeviceViewModel
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @Composable
@@ -26,6 +32,10 @@ fun DeviceScreen(
     discoverServices: () -> Unit,
     readButtonState :(serviceUuid: UUID, characteristicUuid: UUID) -> String?
 ) {
+    val viewModel :BleDeviceViewModel= viewModel()
+    val buttonState by viewModel.buttonState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = modifier.scrollable(rememberScrollState(), Orientation.Vertical)
     ) {
@@ -38,15 +48,24 @@ fun DeviceScreen(
         }
         LazyColumn {
             items(discoveredCharacteristics.keys.sorted()) { serviceUuid ->
-                Text(text = serviceUuid, fontWeight = FontWeight.Black)
-                Column(modifier = Modifier.padding(start = 10.dp)) {
-                    discoveredCharacteristics[serviceUuid]?.forEach {
-                        Button(onClick = {
-                            val buttonState :String? = readButtonState(UUID.fromString(serviceUuid), UUID.fromString(it))
-                        }) {
+                if (serviceUuid == "a72bbab0-fa0f-4af4-b29e-283349cff831") {
+                    Column(modifier = Modifier.padding(start = 10.dp)) {
+                        discoveredCharacteristics[serviceUuid]?.forEach {characteristicUuid ->
+                            if (characteristicUuid =="efe21743-1642-4ccf-a686-8f9275717c7f") {
+                                Button(onClick = {
+                                    coroutineScope.launch {
+                                        viewModel.readButtonState(UUID.fromString(serviceUuid), UUID.fromString(characteristicUuid), readButtonState)
+                                    }
+                                }) {
 
-                            Text(text = it)
+                                    Text(text = "Know ButtonState")
+                                }
+                                val key = "$serviceUuid-$characteristicUuid"
+                                val state = buttonState[key] ?: "Unknown"
+                                Text(text = "ButtonState: $state")
+                            }
                         }
+
                     }
                 }
             }

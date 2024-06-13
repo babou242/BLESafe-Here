@@ -77,13 +77,15 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
 //        }
 //    }
 @RequiresPermission(PERMISSION_BLUETOOTH_CONNECT)
-fun readCharacteristic(serviceUUID: UUID, characteristicUUID: UUID):String? {
+fun readCharacteristic(serviceUUID: UUID, characteristicUUID: UUID): String? {
     val service = gatt?.getService(serviceUUID)
     val characteristic = service?.getCharacteristic(characteristicUUID)
 
     if (characteristic != null) {
         val success = gatt?.readCharacteristic(characteristic)
-        return String(characteristic.value)
+        if (success == true) {
+            return characteristic.value?.let { String(it) } ?: "No value"
+        }
     }
     return null
 }
