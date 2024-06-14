@@ -24,13 +24,13 @@ import com.example.appblesafhere.presentation.viewmodel.BleScanViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MissingPermission")
 @Composable
-fun Navigation(){
+fun Navigation() {
 
     val viewModel: BleScanViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val navController = rememberNavController()
-    
+
     NavHost(navController = navController, startDestination = Screen.PermissionScreen.route) {
         composable(route = Screen.PermissionScreen.route) {
             Scaffold(
@@ -44,44 +44,47 @@ fun Navigation(){
             )
         }
         composable(route = Screen.ScanningScreen.route) {
-            if (uiState.activeDevice == null) {
-                Scaffold(
-                    topBar = { TopBar(title = "Device") },
-                    content = { paddingValues ->
-                        ScanningScreen(
-                            modifier = Modifier.padding(paddingValues),
-                            isScanning = uiState.isScanning,
-                            foundDevices = uiState.foundDevices,
-                            startScanning = viewModel::startScanning,
-                            stopScanning = viewModel::stopScanning,
-                            selectDevice = { device ->
-                                viewModel.stopScanning()
-                                viewModel.setActiveDevice(device)
-                            })
-                    }
-                )
 
-            } else {
-                Scaffold(
-                    topBar = { TopBar(title = "Device") },
-                    content = { paddingValues ->
-                        DeviceScreen(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            unselectDevice = {
-                                viewModel.disconnectActiveDevice()
-                                viewModel.setActiveDevice(null)
-                            },
-                            isDeviceConnected = uiState.isDeviceConnected,
-                            discoveredCharacteristics = uiState.discoveredCharacteristics,
-                            connect = viewModel::connectActiveDevice,
-                            discoverServices = viewModel::discoverActiveDeviceServices,
-                            readButtonState = viewModel::readCharacteristic
-                        )
-                    }
-                )
-            }
+            Scaffold(
+                topBar = { TopBar(title = "Device") },
+                content = { paddingValues ->
+                    ScanningScreen(
+                        modifier = Modifier.padding(paddingValues),
+                        isScanning = uiState.isScanning,
+                        foundDevices = uiState.foundDevices,
+                        startScanning = viewModel::startScanning,
+                        stopScanning = viewModel::stopScanning,
+                        selectDevice = { device ->
+                            viewModel.stopScanning()
+                            viewModel.setActiveDevice(device)
+                        },
+                        activeDevice= uiState.activeDevice,
+                        navController= navController)
+                }
+            )
+        }
+        composable(route = Screen.DeviceScreen.route) {
+            Scaffold(
+                topBar = { TopBar(title = "Device") },
+                content = { paddingValues ->
+                    DeviceScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        unselectDevice = {
+                            viewModel.disconnectActiveDevice()
+                            viewModel.setActiveDevice(null)
+                        },
+                        isDeviceConnected = uiState.isDeviceConnected,
+                        discoveredCharacteristics = uiState.discoveredCharacteristics,
+                        connect = viewModel::connectActiveDevice,
+                        discoverServices = viewModel::discoverActiveDeviceServices,
+                        readButtonState = viewModel::readCharacteristic,
+                        navController = navController,
+                        activeDevice = uiState.activeDevice
+                    )
+                }
+            )
         }
     }
 }
