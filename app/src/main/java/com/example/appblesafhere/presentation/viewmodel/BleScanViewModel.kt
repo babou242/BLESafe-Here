@@ -97,6 +97,11 @@ class BleScanViewModel(private val application :Application) :AndroidViewModel(a
         return activeDeviceConnection.value?.readCharacteristic(serviceUUID,characteristicUUID)
     }
 
+    @RequiresPermission(PERMISSION_BLUETOOTH_CONNECT)
+    fun startReceivingButtonUpdates() {
+        activeDeviceConnection.value?.startReceivingButtonUpdates()
+    }
+
 
     override fun onCleared() {
         super.onCleared()

@@ -81,7 +81,8 @@ fun Navigation() {
                         discoverServices = viewModel::discoverActiveDeviceServices,
                         readButtonState = viewModel::readCharacteristic,
                         navController = navController,
-                        activeDevice = uiState.activeDevice
+                        activeDevice = uiState.activeDevice,
+                        enableNotification = viewModel::startReceivingButtonUpdates
                     )
                 }
             )
