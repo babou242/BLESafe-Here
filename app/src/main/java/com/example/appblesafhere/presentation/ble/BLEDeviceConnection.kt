@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import com.example.appblesafhere.presentation.viewmodel.BleScanViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.UUID
 
@@ -18,7 +19,8 @@ val BUTTON_DESCRIPTOR_UUID :UUID = UUID.fromString("00002902-0000-1000-8000-0080
 
 class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") constructor(
     private val context:Context,
-    private val bluetoothDevice: BluetoothDevice
+    private val bluetoothDevice: BluetoothDevice,
+    private val BleScanViewModel: BleScanViewModel
 ){
     val isConnected = MutableStateFlow(false)
     val services = MutableStateFlow<List<BluetoothGattService>>(emptyList())
@@ -58,6 +60,7 @@ class BLEDeviceConnection @RequiresPermission("PERMISSION_BLUETOOTH_CONNECT") co
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
             Log.v("bluetooth", String(characteristic.value))
+            BleScanViewModel.updateBLEData(String(characteristic.value))
         }
 
         override fun onDescriptorWrite(

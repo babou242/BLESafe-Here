@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.appblesafhere.presentation.ble.BLEDeviceConnection
 import com.example.appblesafhere.presentation.ble.BLEScanner
@@ -29,6 +31,9 @@ class BleScanViewModel(private val application :Application) :AndroidViewModel(a
 
     private val bleScanner = BLEScanner(application)
     private val activeDeviceConnection = MutableStateFlow<BLEDeviceConnection?>(null)
+
+    private val _bleData = MutableLiveData<String>()
+    val bleData: LiveData<String> get()= _bleData
 
 
     private val isDeviceConnected = activeDeviceConnection.flatMapLatest { it?.isConnected ?: flowOf(false) }
@@ -73,7 +78,7 @@ class BleScanViewModel(private val application :Application) :AndroidViewModel(a
     @SuppressLint("MissingPermission")
     @RequiresPermission(allOf = [PERMISSION_BLUETOOTH_CONNECT, PERMISSION_BLUETOOTH_SCAN])
     fun setActiveDevice(device: BluetoothDevice?) {
-        activeDeviceConnection.value = device?.run { BLEDeviceConnection(application, device) }
+        activeDeviceConnection.value = device?.run { BLEDeviceConnection(application, device,this@BleScanViewModel) }
         _uiState.update { it.copy(activeDevice = device) }
     }
 
@@ -102,6 +107,10 @@ class BleScanViewModel(private val application :Application) :AndroidViewModel(a
         activeDeviceConnection.value?.startReceivingButtonUpdates()
     }
 
+    fun updateBLEData(data: String) {
+        _uiState.value = _uiState.value.copy(bleData = data) ?: BLEScanUIState(bleData = null)
+    }
+
 
     override fun onCleared() {
         super.onCleared()
@@ -126,4 +135,5 @@ data class BLEScanUIState(
     val activeDevice: BluetoothDevice? = null,
     val isDeviceConnected: Boolean = false,
     val discoveredCharacteristics: Map<String, List<String>> = emptyMap(),
+    val bleData: String? = null
 )
