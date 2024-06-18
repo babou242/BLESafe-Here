@@ -17,17 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.appblesafhere.presentation.Screen
-import com.example.appblesafhere.presentation.viewmodel.BleDeviceViewModel
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 @Composable
@@ -43,9 +36,7 @@ fun DeviceScreen(
     enableNotification :() -> Unit,
     activeDevice: BluetoothDevice?
 ) {
-    val viewModel :BleDeviceViewModel= viewModel()
-    val buttonState by viewModel.buttonState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
+
 
     if (activeDevice != null) {
         Column(
@@ -65,22 +56,11 @@ fun DeviceScreen(
                             discoveredCharacteristics[serviceUuid]?.forEach {characteristicUuid ->
                                 if (characteristicUuid =="efe21743-1642-4ccf-a686-8f9275717c7f") {
                                     Row{
-                                        Button(onClick = {
-                                            coroutineScope.launch {
-                                                viewModel.readButtonState(UUID.fromString(serviceUuid), UUID.fromString(characteristicUuid), readButtonState)
-                                            }
-                                        }) {
-
-                                            Text(text = "Know ButtonState")
-                                        }
                                         Spacer(modifier = Modifier.weight(1f))
                                         Button(onClick = enableNotification) {
                                             Icon(imageVector = Icons.Default.Send, contentDescription = null)
                                         }
                                     }
-                                    val key = "$serviceUuid-$characteristicUuid"
-                                    val state = buttonState[key] ?: "Unknown"
-                                    Text(text = "ButtonState: $state")
                                 }
                             }
 
